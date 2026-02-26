@@ -25,20 +25,22 @@ void print_cpu(cpu_t *cpu) {
     printf("\n");
 }
 
+static uint8_t fetch_byte(cpu_t *cpu) {
+    assert(cpu->PC < cpu->rom_size_bytes);
+    return cpu->ROM[cpu->PC++];
+}
+
 bool execute_instruction(cpu_t *cpu) {
+    uint8_t reg1 = 0, reg2 = 0, addr = 0;
+    instruction_t instruction = { 0 };
+
     if (cpu->PC >= cpu->rom_size_bytes) {
         return false;
     }
     
-    uint8_t reg1, reg2, addr;
-    instruction_t instruction = {
-        .opcode = cpu->ROM[cpu->PC++],
-        .operand = 0,
-    };
-    
+    instruction.opcode = fetch_byte(cpu);
     if (instruction.opcode != OPCODE_HALT) {
-        assert(cpu->PC < cpu->rom_size_bytes);
-        instruction.operand = cpu->ROM[cpu->PC++];
+        instruction.operand = fetch_byte(cpu);
     }
 
     switch (instruction.opcode) {
