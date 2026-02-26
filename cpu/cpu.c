@@ -33,7 +33,7 @@ static void extract_regs(cpu_t *cpu, uint8_t *reg1, uint8_t *reg2) {
 }
 
 bool execute_instruction(cpu_t *cpu) {
-    uint8_t opcode = 0, operand = 0, reg1 = 0, reg2 = 0, addr = 0, imm8 = 0;
+    uint8_t opcode = 0, reg1 = 0, reg2 = 0, addr = 0, imm8 = 0;
 
     if (cpu->PC >= cpu->rom_size_bytes) {
         return false;

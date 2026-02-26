@@ -38,7 +38,7 @@ static bool program_header_valid(prg_header_t *program_header, size_t prg_size) 
         }
 
         // Check file validity according to header
-        if (PROGRAM_HEADER_SIZE_BYTES + program_header->rom_size + program_header->ram_size != prg_size) {
+        if (PROGRAM_HEADER_SIZE_BYTES + (size_t)(program_header->rom_size) + (size_t)(program_header->ram_size) != prg_size) {
             break;
         }
         valid = true;

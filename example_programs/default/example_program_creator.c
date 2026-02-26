@@ -34,7 +34,7 @@ uint8_t RAM[] = {
     0x01,
 };
 
-int main(int argc, char *argv[]) {
+int main(void) {
     uint8_t pc_entry_point = PC_ENTRY_POINT;
     uint8_t size_of_rom = sizeof(ROM);
     uint8_t size_of_ram = sizeof(RAM);
