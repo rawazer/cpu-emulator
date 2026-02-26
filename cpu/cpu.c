@@ -6,17 +6,11 @@
 #include "cpu.h"
 
 void print_cpu(cpu_t *cpu) {
-    printf("PC: %d\n", cpu->PC);
-    printf("ZF: %d\n", cpu->ZF);
-    printf("Program size: %d\n", cpu->rom_size_bytes);
-    printf("ROM:\n");
-    for (int i = 0; i < cpu->rom_size_bytes; i++) {
-        printf("%02X ", cpu->ROM[i]);
-    }
-    printf("\n");
-    printf("Registers:\n");
+    printf("PC: %d | ", cpu->PC);
+    printf("Instruction: 0x%x | ", cpu->ROM[cpu->PC]);
+    printf("Registers: ");
     for (int i = 0; i < NUM_REGS; i++) {
-        printf("R%d: %02X\n", i, cpu->registers[i]);
+        printf("%02X ", cpu->registers[i]);
     }
     printf("\n");
 }
