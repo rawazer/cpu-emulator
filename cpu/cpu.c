@@ -5,8 +5,9 @@
 #include "../defines.h"
 #include "cpu.h"
 
-#define EXTRACT_REGS(operand, reg1, reg2) \
-    reg1 = (operand >> 4) & 0x0F; \
+#define EXTRACT_REGS(cpu, operand, reg1, reg2)  \
+    operand = fetch_byte(cpu); \
+    reg1 = (operand >> 4) & 0x0F;      \
     reg2 = operand & 0x0F;
 
 void print_cpu(cpu_t *cpu) {
@@ -31,66 +32,71 @@ static uint8_t fetch_byte(cpu_t *cpu) {
 }
 
 bool execute_instruction(cpu_t *cpu) {
-    uint8_t reg1 = 0, reg2 = 0, addr = 0;
-    instruction_t instruction = { 0 };
+    uint8_t opcode = 0, operand = 0, reg1 = 0, reg2 = 0, addr = 0, imm8 = 0;
 
     if (cpu->PC >= cpu->rom_size_bytes) {
         return false;
     }
-    
-    instruction.opcode = fetch_byte(cpu);
-    if (instruction.opcode != OPCODE_HALT) {
-        instruction.operand = fetch_byte(cpu);
-    }
 
-    switch (instruction.opcode) {
+    opcode = fetch_byte(cpu);
+    switch (opcode) {
         case OPCODE_MOV:
-            EXTRACT_REGS(instruction.operand, reg1, reg2);
+            EXTRACT_REGS(cpu, operand, reg1, reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->registers[reg1] = cpu->registers[reg2];
             return true;
         case OPCODE_ADD:
-            EXTRACT_REGS(instruction.operand, reg1, reg2);
+            EXTRACT_REGS(cpu, operand, reg1, reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->registers[reg1] = cpu->registers[reg1] + cpu->registers[reg2];
             cpu->ZF = (cpu->registers[reg1] == 0);
             return true;
         case OPCODE_SUB:
-            EXTRACT_REGS(instruction.operand, reg1, reg2);
+            EXTRACT_REGS(cpu, operand, reg1, reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->registers[reg1] = cpu->registers[reg1] - cpu->registers[reg2];
             cpu->ZF = (cpu->registers[reg1] == 0);
             return true;
         case OPCODE_LD:
-            EXTRACT_REGS(instruction.operand, reg1, addr);
+            reg1 = fetch_byte(cpu);
+            addr = fetch_byte(cpu);
             assert(reg1 < NUM_REGS);
             assert(addr < cpu->ram_size_bytes);
             cpu->registers[reg1] = cpu->RAM[addr];
             return true;
         case OPCODE_ST:
-            EXTRACT_REGS(instruction.operand, reg1, addr);
+            reg1 = fetch_byte(cpu);
+            addr = fetch_byte(cpu);
             assert(reg1 < NUM_REGS);
             assert(addr < cpu->ram_size_bytes);
             cpu->RAM[addr] = cpu->registers[reg1];
             return true;
         case OPCODE_JMP:
-            assert(instruction.operand < cpu->rom_size_bytes);
-            cpu->PC = instruction.operand;
+            addr = fetch_byte(cpu);
+            assert(addr < cpu->rom_size_bytes);
+            cpu->PC = addr;
             return true;
         case OPCODE_JZ:
-            assert(instruction.operand < cpu->rom_size_bytes);
+        addr = fetch_byte(cpu);
+            assert(addr < cpu->rom_size_bytes);
             if (cpu->ZF) {
-                cpu->PC = instruction.operand;
+                cpu->PC = addr;
             }
             return true;
         case OPCODE_CMP:
-            EXTRACT_REGS(instruction.operand, reg1, reg2);
+            EXTRACT_REGS(cpu, operand, reg1, reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->ZF = cpu->registers[reg1] == cpu->registers[reg2];
+            return true;
+        case OPCODE_LDI:
+            reg1 = fetch_byte(cpu);
+            imm8 = fetch_byte(cpu);
+            assert(reg1 < NUM_REGS);
+            cpu->registers[reg1] = imm8;
             return true;
         case OPCODE_HALT:
             return false;

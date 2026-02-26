@@ -19,6 +19,7 @@ typedef enum {
     OPCODE_JMP = 0x06,
     OPCODE_JZ = 0x07,
     OPCODE_CMP = 0x08,
+    OPCODE_LDI = 0x09,
     OPCODE_HALT = 0xFF
 } opcode_t;
 
