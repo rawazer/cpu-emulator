@@ -5,11 +5,6 @@
 #include "../defines.h"
 #include "cpu.h"
 
-#define EXTRACT_REGS(cpu, operand, reg1, reg2)  \
-    operand = fetch_byte(cpu); \
-    reg1 = (operand >> 4) & 0x0F;      \
-    reg2 = operand & 0x0F;
-
 void print_cpu(cpu_t *cpu) {
     printf("PC: %d\n", cpu->PC);
     printf("ZF: %d\n", cpu->ZF);
@@ -31,6 +26,12 @@ static uint8_t fetch_byte(cpu_t *cpu) {
     return cpu->ROM[cpu->PC++];
 }
 
+static void extract_regs(cpu_t *cpu, uint8_t *reg1, uint8_t *reg2) {
+    uint8_t operand = fetch_byte(cpu);
+    *reg1 = (operand >> 4) & 0x0F;
+    *reg2 = operand & 0x0F;
+}
+
 bool execute_instruction(cpu_t *cpu) {
     uint8_t opcode = 0, operand = 0, reg1 = 0, reg2 = 0, addr = 0, imm8 = 0;
 
@@ -41,20 +42,20 @@ bool execute_instruction(cpu_t *cpu) {
     opcode = fetch_byte(cpu);
     switch (opcode) {
         case OPCODE_MOV:
-            EXTRACT_REGS(cpu, operand, reg1, reg2);
+            extract_regs(cpu, &reg1, &reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->registers[reg1] = cpu->registers[reg2];
             return true;
         case OPCODE_ADD:
-            EXTRACT_REGS(cpu, operand, reg1, reg2);
+            extract_regs(cpu, &reg1, &reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->registers[reg1] = cpu->registers[reg1] + cpu->registers[reg2];
             cpu->ZF = (cpu->registers[reg1] == 0);
             return true;
         case OPCODE_SUB:
-            EXTRACT_REGS(cpu, operand, reg1, reg2);
+            extract_regs(cpu, &reg1, &reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->registers[reg1] = cpu->registers[reg1] - cpu->registers[reg2];
@@ -87,7 +88,7 @@ bool execute_instruction(cpu_t *cpu) {
             }
             return true;
         case OPCODE_CMP:
-            EXTRACT_REGS(cpu, operand, reg1, reg2);
+            extract_regs(cpu, &reg1, &reg2);
             assert(reg1 < NUM_REGS);
             assert(reg2 < NUM_REGS);
             cpu->ZF = cpu->registers[reg1] == cpu->registers[reg2];
