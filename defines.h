@@ -3,7 +3,11 @@
 
 #include <stdint.h>
 
-#define RAM_SIZE_BYTES 256
+#define PROGRAM_HEADER_SIZE_BYTES 3
+#define MAX_ROM_SIZE_BYTES 256
+#define MAX_RAM_SIZE_BYTES 256
+#define MAX_PROGRAM_FILE_SIZE_BYTES PROGRAM_HEADER_SIZE_BYTES + MAX_ROM_SIZE_BYTES + MAX_RAM_SIZE_BYTES
+#define MIN_PROGRAM_FILE_SIZE_BYTES PROGRAM_HEADER_SIZE_BYTES
 #define NUM_REGS 4
 
 typedef enum {
@@ -27,8 +31,10 @@ typedef struct {
     uint8_t registers[NUM_REGS];
     uint8_t PC;
     uint8_t ZF;
-    uint8_t RAM[RAM_SIZE_BYTES];
-    uint8_t program_size_bytes;
+    uint8_t rom_size_bytes;
+    uint8_t ram_size_bytes;
+    uint8_t ROM[MAX_ROM_SIZE_BYTES];
+    uint8_t RAM[MAX_RAM_SIZE_BYTES];
 } cpu_t;
 
 #endif // DEFINES_H

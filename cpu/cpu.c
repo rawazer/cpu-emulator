@@ -9,28 +9,13 @@
     reg1 = (operand >> 4) & 0x0F; \
     reg2 = operand & 0x0F;
 
-void init_cpu(cpu_t *cpu) {
-    cpu->PC = 3;
-    cpu->ZF = 0;
-    cpu->program_size_bytes = 0;
-    // Initialize arrays to zero
-    for (int i = 0; i < NUM_REGS; i++) {
-        cpu->registers[i] = 0;
-    }
-    for (int i = 0; i < RAM_SIZE_BYTES; i++) {
-        cpu->RAM[i] = 0;
-    }
-}
-
-
-
 void print_cpu(cpu_t *cpu) {
     printf("PC: %d\n", cpu->PC);
     printf("ZF: %d\n", cpu->ZF);
-    printf("Program size: %d\n", cpu->program_size_bytes);
-    printf("RAM:\n");
-    for (int i = 0; i < cpu->program_size_bytes; i++) {
-        printf("%02X ", cpu->RAM[i]);
+    printf("Program size: %d\n", cpu->rom_size_bytes);
+    printf("ROM:\n");
+    for (int i = 0; i < cpu->rom_size_bytes; i++) {
+        printf("%02X ", cpu->ROM[i]);
     }
     printf("\n");
     printf("Registers:\n");
@@ -41,19 +26,19 @@ void print_cpu(cpu_t *cpu) {
 }
 
 bool execute_instruction(cpu_t *cpu) {
-    if (cpu->PC >= cpu->program_size_bytes) {
+    if (cpu->PC >= cpu->rom_size_bytes) {
         return false;
     }
     
     uint8_t reg1, reg2, addr;
     instruction_t instruction = {
-        .opcode = cpu->RAM[cpu->PC++],
+        .opcode = cpu->ROM[cpu->PC++],
         .operand = 0,
     };
     
     if (instruction.opcode != OPCODE_HALT) {
-        assert(cpu->PC < cpu->program_size_bytes);
-        instruction.operand = cpu->RAM[cpu->PC++];
+        assert(cpu->PC < cpu->rom_size_bytes);
+        instruction.operand = cpu->ROM[cpu->PC++];
     }
 
     switch (instruction.opcode) {
@@ -80,21 +65,21 @@ bool execute_instruction(cpu_t *cpu) {
         case OPCODE_LD:
             EXTRACT_REGS(instruction.operand, reg1, addr);
             assert(reg1 < NUM_REGS);
-            assert(addr < RAM_SIZE_BYTES);
+            assert(addr < cpu->ram_size_bytes);
             cpu->registers[reg1] = cpu->RAM[addr];
             return true;
         case OPCODE_ST:
             EXTRACT_REGS(instruction.operand, reg1, addr);
             assert(reg1 < NUM_REGS);
-            assert(addr < RAM_SIZE_BYTES);
+            assert(addr < cpu->ram_size_bytes);
             cpu->RAM[addr] = cpu->registers[reg1];
             return true;
         case OPCODE_JMP:
-            assert(instruction.operand < cpu->program_size_bytes);
+            assert(instruction.operand < cpu->rom_size_bytes);
             cpu->PC = instruction.operand;
             return true;
         case OPCODE_JZ:
-            assert(instruction.operand < cpu->program_size_bytes);
+            assert(instruction.operand < cpu->rom_size_bytes);
             if (cpu->ZF) {
                 cpu->PC = instruction.operand;
             }

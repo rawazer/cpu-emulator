@@ -11,12 +11,15 @@
 int main(int argc, char *argv[]) {
     int ret = ERROR;
     prg_load_status_t load_status = PRG_LOAD_FILE_NOT_FOUND;
-    cpu_t cpu;
-    init_cpu(&cpu);
+    cpu_t cpu = { 0 };
 
     do {
         /* Load program */
-        load_status = load_program(&cpu, "program.bin");
+        if (argc != 2) {
+            printf("Please provide program to load as second argument.");
+            break;
+        }
+        load_status = load_program(&cpu, argv[1]);
         if (PRG_LOAD_OK != load_status) {
             printf("Failed to load program: %d\n", load_status);
             break;
@@ -25,6 +28,7 @@ int main(int argc, char *argv[]) {
         do {
             print_cpu(&cpu);
         } while (execute_instruction(&cpu));
+
         ret = OK;
     } while (0);
     
